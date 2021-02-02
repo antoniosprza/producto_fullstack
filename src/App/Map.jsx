@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import PropTypes from 'prop-types';
 import { getPoints } from '../Utils/ApiUils';
 import './Map.css';
+import axios from 'axios';
 
 function Map (props) {
   const {
@@ -12,7 +13,7 @@ function Map (props) {
     lng,
     zoom,
     basemapURL,
-    requestPoint,
+    requestPoint
   } = props;
 
   let username = '';
@@ -29,14 +30,14 @@ function Map (props) {
       tableName = process.env.REACT_APP_TABLE_NAME;
     }
   }
-  
+
   const map = useRef({});
 
   requestPoint.current = async () => {
     const pointsLayer = await createPointsLayer(username, apiKey, tableName);
     const popup = L.popup({ closeButton: true });
     pointsLayer.addTo(map.current);
-    
+
     pointsLayer.eachLayer(point=> {
       point.on('click', e => {
         let htmlContent;
@@ -49,8 +50,8 @@ function Map (props) {
       });
     });
   };
-  
-    
+
+
   useEffect(() => {
     map.current = L.map('map', {
       center: [lat, lng],
@@ -73,7 +74,7 @@ function Map (props) {
     <div id="map"/>
   );
 }
-    
+
 const createPointsLayer = async (user, key, tableName) => {
   let pointData;
   await getPoints(user, key, tableName).then(data=>pointData = data);
@@ -88,21 +89,68 @@ const createPointsLayer = async (user, key, tableName) => {
 
   return L.layerGroup(pointsArray);
 };
-    
+
+
+
+function getAdd(lat, longi){
+  var url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='
+    + lat + ',' + longi
+    + '&key=AIzaSyDzffiJHKOuLRrQm7FbKrwIzJMCXqaZGGA';
+  //let response = await axios.get(url);
+  //return await
+  return axios.get(url)
+    .then(response => {
+      //props = {address: resp.data.results[0].formatted_address}
+      this.response = response.data
+      //let object = {addres: resp.data.results[0].formatted_address}
+      //let props {address} = resp.data.results[0].formatted_address
+      //return resp.data.results[0].formatted_address
+      return this.response.results[0].formatted_address
+    });
+}
+
+function axiosTest(la, lo){
+  var url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='
+    + la + ',' + lo
+    + '&key=AIzaSyDzffiJHKOuLRrQm7FbKrwIzJMCXqaZGGA';
+  const promise = axios.get(url);
+  const dataPromise = promise.then((response) => response.data)
+  return dataPromise
+}
+
+
+
 function makeMarkupOnePoint(lat, lng, info = '') {
+  var latitud = lat;
+  var longitud = lng;
+  var url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='
+    + lat + ',' + lng
+    + '&key=AIzaSyDzffiJHKOuLRrQm7FbKrwIzJMCXqaZGGA';
+
+  var a;
+  axiosTest(latitud, longitud)
+    .then(data => {
+      a = data.results[0].formatted_address
+      console.log(data.results[0].formatted_address)
+      //data.json({ message: 'Request received!', data })
+    })
+    .catch(err => console.log(err));
+
+
+
   return `
     <div class="widget">
     ${lat ? `
     <h3>${lat}, ${lng}</h3>
     `: ''}
-    ${info ? `
-    <h4>${info}</h4>
+    ${a ? `
+    <h4>${a}</h4>
     `: '<h4>No hay dirección</h4>'}
     </div>
   `;
 }
-    
-    
+
+
 Map.propTypes = {
   basemapURL: PropTypes.string,
   lat: PropTypes.number.isRequired,
@@ -119,6 +167,5 @@ Map.defaultProps = {
     current: () => {},
   }
 }
-    
+
 export default Map;
-    

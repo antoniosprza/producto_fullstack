@@ -4,7 +4,7 @@ axios.defaults.headers.common.Accept = 'application/json';
 
 const fetch = (endpoint) => {
 return axios
-    .get(endpoint)
+    .get('http://localhost:8080/api/points')
     .then((res) => res)
     .catch((err) => {
     console.error(
@@ -18,9 +18,9 @@ export const getPoints = (user = '', apiKey = '', table = '') => {
     return fetch(query)
       .then(res=> {
         const data = [];
-        res.data.rows.forEach(point=>{
+        res.data.forEach(point=>{
           data.push({lat: point.latitude, lng: point.longitude})
-      });
-      return data;
+        })
+        return data;
       });
   };
