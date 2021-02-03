@@ -38,10 +38,10 @@ function Map (props) {
     const popup = L.popup({ closeButton: true });
     pointsLayer.addTo(map.current);
 
-    pointsLayer.eachLayer(point=> {
-      point.on('click', e => {
+    pointsLayer.eachLayer(async point=> {
+      point.on('click', async e => {
         let htmlContent;
-        htmlContent = makeMarkupOnePoint(e.latlng.lat, e.latlng.lng, e.direction);
+        htmlContent = await makeMarkupOnePoint(e.latlng.lat, e.latlng.lng, e.direction);
         popup.setContent(htmlContent);
         popup.setLatLng(e.latlng);
         if (!popup.isOpen()) {
@@ -109,18 +109,31 @@ function getAdd(lat, longi){
     });
 }
 
-function axiosTest(la, lo){
+const  axiosTest =  async (la, lo)=>{
   var url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='
     + la + ',' + lo
     + '&key=AIzaSyDzffiJHKOuLRrQm7FbKrwIzJMCXqaZGGA';
-  const promise = axios.get(url);
-  const dataPromise = promise.then((response) => response.data)
+  const promise = await axios.get(url);
+  const dataPromise = promise
   return dataPromise
+}
+
+const funcionAxios = (latitud, longitud) => {
+  var url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='
+    + latitud + ',' + longitud
+    + '&key=AIzaSyDzffiJHKOuLRrQm7FbKrwIzJMCXqaZGGA';
+  axios.get(url)
+    .then((result) => {
+      return result
+    })
+    .catch((error) => {
+      return error
+    })
 }
 
 
 
-function makeMarkupOnePoint(lat, lng, info = '') {
+const  makeMarkupOnePoint = async (lat, lng, info = '')  =>{
   var latitud = lat;
   var longitud = lng;
   var url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='
@@ -128,15 +141,17 @@ function makeMarkupOnePoint(lat, lng, info = '') {
     + '&key=AIzaSyDzffiJHKOuLRrQm7FbKrwIzJMCXqaZGGA';
 
   var a;
-  axiosTest(latitud, longitud)
-    .then(data => {
-      a = data.results[0].formatted_address
-      console.log(data.results[0].formatted_address)
+  await axiosTest(latitud, longitud)
+    .then(res => {
+      a = res.data.results[0].formatted_address
+      console.log(res.data.results[0].formatted_address)
       //data.json({ message: 'Request received!', data })
     })
     .catch(err => console.log(err));
 
-
+  const principal = async() => {
+    const resultadoAxios = await funcionAxios(latitud, longitud)
+  }
 
   return `
     <div class="widget">
