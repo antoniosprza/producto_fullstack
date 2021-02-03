@@ -144,7 +144,7 @@ const  makeMarkupOnePoint = async (lat, lng, info = '')  =>{
   await axiosTest(latitud, longitud)
     .then(res => {
       a = res.data.results[0].formatted_address
-      console.log(res.data.results[0].formatted_address)
+      //console.log(res.data.results[0].formatted_address)
       //data.json({ message: 'Request received!', data })
     })
     .catch(err => console.log(err));
